@@ -6,6 +6,11 @@ const startGameBtn = document.getElementById("start-game");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 const restartBtn = document.getElementById("restart");
+const pauseBtn = document.getElementById("pause");
+const muteBtn = document.getElementById("mute");
+const mobileJumpBtn = document.getElementById("mobile-jump");
+const mobilePauseBtn = document.getElementById("mobile-pause");
+const hudToastEl = document.getElementById("hud-toast");
 const scoreFormEl = document.getElementById("score-form");
 const playerNameEl = document.getElementById("player-name");
 const saveScoreBtnEl = document.getElementById("save-score");
@@ -78,7 +83,13 @@ const state = {
   terrainSegments: [],
   scoreSavedForRun: false,
   leaderboardEntries: [],
+  paused: false,
+  muted: false,
+  runStartBest: 0,
+  newBestAnnounced: false,
 };
+
+let toastTimeoutId = null;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -216,6 +227,43 @@ function setScoreStatus(text) {
   scoreStatusEl.textContent = text;
 }
 
+function showToast(text, ms = 1500) {
+  hudToastEl.textContent = text;
+  hudToastEl.classList.remove("hidden");
+  if (toastTimeoutId) {
+    clearTimeout(toastTimeoutId);
+  }
+  toastTimeoutId = setTimeout(() => {
+    hudToastEl.classList.add("hidden");
+    toastTimeoutId = null;
+  }, ms);
+}
+
+function syncMuteUi() {
+  muteBtn.textContent = state.muted ? "Lyd: Av" : "Lyd: På";
+}
+
+function syncPauseUi() {
+  const label = state.paused ? "Fortsett" : "Pause";
+  pauseBtn.textContent = label;
+  mobilePauseBtn.textContent = label;
+}
+
+function toggleMute() {
+  state.muted = !state.muted;
+  syncMuteUi();
+  showToast(state.muted ? "Lyd av" : "Lyd på", 900);
+}
+
+function togglePause() {
+  if (!state.sessionStarted || state.introActive || !state.running) {
+    return;
+  }
+  state.paused = !state.paused;
+  syncPauseUi();
+  showToast(state.paused ? "Pauset" : "Fortsetter", 900);
+}
+
 function renderLeaderboard() {
   leaderboardListEl.innerHTML = "";
   for (const entry of state.leaderboardEntries) {
@@ -299,6 +347,7 @@ async function submitScore(name, score) {
 
     state.scoreSavedForRun = true;
     setScoreStatus("Score lagret!");
+    showToast("Score lagret globalt!", 1300);
     await fetchLeaderboard();
   } catch (_err) {
     setScoreStatus("Kunne ikke lagre score.");
@@ -312,6 +361,8 @@ function beginIntro() {
   state.running = false;
   state.score = 0;
   state.scoreSavedForRun = false;
+  state.paused = false;
+  state.newBestAnnounced = false;
   state.obstacles = [];
   state.player.vy = 0;
   state.worldOffset = 0;
@@ -345,6 +396,9 @@ function resetGame(rebuildTerrain = true) {
   state.running = true;
   state.introActive = false;
   state.scoreSavedForRun = false;
+  state.paused = false;
+  state.runStartBest = state.best;
+  state.newBestAnnounced = false;
 
   const now = performance.now();
   state.lastSpawnAt = now;
@@ -352,6 +406,7 @@ function resetGame(rebuildTerrain = true) {
   state.speed = 7.2;
 
   syncHud();
+  syncPauseUi();
 }
 
 function syncHud() {
@@ -465,7 +520,7 @@ function overlapsX(a, b) {
 }
 
 function jump() {
-  if (!state.sessionStarted || !state.running || state.introActive) {
+  if (!state.sessionStarted || !state.running || state.introActive || state.paused) {
     return;
   }
 
@@ -525,6 +580,10 @@ function update(now) {
     return;
   }
 
+  if (state.paused) {
+    return;
+  }
+
   const elapsedSeconds = (now - state.startedAt) / 1000;
   state.speed = 7.2 + elapsedSeconds * 0.12;
   const worldStep = state.speed;
@@ -545,6 +604,10 @@ function update(now) {
   if (state.score > state.best) {
     state.best = state.score;
     saveBestScore(state.best);
+    if (!state.newBestAnnounced && state.score > state.runStartBest) {
+      state.newBestAnnounced = true;
+      showToast("Ny rekord!", 1400);
+    }
   }
 
   const spawnDelay = Math.max(520, 980 - elapsedSeconds * 12);
@@ -945,6 +1008,15 @@ function draw(now) {
     ctx.font = "18px Segoe UI";
     ctx.fillText(`Poeng: ${Math.floor(state.score)}`, canvas.width / 2, canvas.height / 2 + 30);
   }
+
+  if (state.paused) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#e5f7ff";
+    ctx.font = "bold 36px Segoe UI";
+    ctx.textAlign = "center";
+    ctx.fillText("Pause", canvas.width / 2, canvas.height / 2);
+  }
 }
 
 function loop(now) {
@@ -968,6 +1040,14 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     jump();
   }
+  if (key === "p") {
+    e.preventDefault();
+    togglePause();
+  }
+  if (key === "m") {
+    e.preventDefault();
+    toggleMute();
+  }
 });
 
 function handleCanvasPress(e) {
@@ -986,6 +1066,20 @@ restartBtn.addEventListener("click", () => {
     beginIntro();
   }
 });
+
+pauseBtn.addEventListener("click", () => {
+  togglePause();
+});
+
+muteBtn.addEventListener("click", () => {
+  toggleMute();
+});
+
+mobileJumpBtn.addEventListener("pointerdown", handleCanvasPress, { passive: false });
+mobilePauseBtn.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  togglePause();
+}, { passive: false });
 
 startGameBtn.addEventListener("click", () => {
   beginGame();
@@ -1019,4 +1113,6 @@ syncHud();
 showStartScreen();
 setScoreStatus("Last inn toppliste...");
 fetchLeaderboard();
+syncMuteUi();
+syncPauseUi();
 requestAnimationFrame(loop);

@@ -14,6 +14,11 @@
     <h1>Jamies Hopper</h1>
     <div class="game-wrap">
       <canvas id="game" width="480" height="640" aria-label="Spillflate"></canvas>
+      <div id="hud-toast" class="hud-toast hidden" aria-live="polite"></div>
+      <div class="mobile-controls">
+        <button id="mobile-jump" type="button">Hopp</button>
+        <button id="mobile-pause" type="button">Pause</button>
+      </div>
       <div id="start-screen" class="start-screen">
         <h2>Klar for oppdrag?</h2>
         <p><strong>Karakter:</strong> Ei_maJ</p>
@@ -28,6 +33,8 @@
       <span>Poeng: <strong id="score">0</strong></span>
       <span>Beste: <strong id="best">0</strong></span>
       <button id="restart" type="button">Start på nytt</button>
+      <button id="pause" type="button">Pause</button>
+      <button id="mute" type="button">Lyd: På</button>
     </div>
     <section class="leaderboard" aria-label="Global highscore">
       <h2>Global Top 25</h2>
