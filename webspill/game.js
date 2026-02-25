@@ -6,7 +6,14 @@ const startGameBtn = document.getElementById("start-game");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 const restartBtn = document.getElementById("restart");
+const scoreFormEl = document.getElementById("score-form");
+const playerNameEl = document.getElementById("player-name");
+const saveScoreBtnEl = document.getElementById("save-score");
+const scoreStatusEl = document.getElementById("score-status");
+const leaderboardListEl = document.getElementById("leaderboard-list");
 const BEST_SCORE_KEY = "spill1_best_score";
+const LEADERBOARD_LIMIT = 25;
+const PLAYER_NAME_MAX = 5;
 
 const PLAYER_IMAGE_W = 1024;
 const PLAYER_IMAGE_H = 1024;
@@ -69,6 +76,8 @@ const state = {
   startedAt: 0,
   worldOffset: 0,
   terrainSegments: [],
+  scoreSavedForRun: false,
+  leaderboardEntries: [],
 };
 
 function clamp(value, min, max) {
@@ -183,10 +192,126 @@ function saveBestScore(value) {
   localStorage.setItem(BEST_SCORE_KEY, String(Math.floor(value)));
 }
 
+function getLeaderboardConfig() {
+  const config = window.LEADERBOARD_CONFIG || {};
+  return {
+    supabaseUrl: (config.supabaseUrl || "").trim(),
+    supabaseAnonKey: (config.supabaseAnonKey || "").trim(),
+  };
+}
+
+function isLeaderboardConfigured() {
+  const cfg = getLeaderboardConfig();
+  return cfg.supabaseUrl.length > 0 && cfg.supabaseAnonKey.length > 0;
+}
+
+function sanitizePlayerName(name) {
+  return (name || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, PLAYER_NAME_MAX);
+}
+
+function setScoreStatus(text) {
+  scoreStatusEl.textContent = text;
+}
+
+function renderLeaderboard() {
+  leaderboardListEl.innerHTML = "";
+  for (const entry of state.leaderboardEntries) {
+    const li = document.createElement("li");
+    li.textContent = `${entry.name} - ${entry.score}`;
+    leaderboardListEl.appendChild(li);
+  }
+}
+
+async function fetchLeaderboard() {
+  if (!isLeaderboardConfigured()) {
+    setScoreStatus("Toppliste ikke konfigurert enda.");
+    state.leaderboardEntries = [];
+    renderLeaderboard();
+    return;
+  }
+
+  const cfg = getLeaderboardConfig();
+  const query = `select=name,score,created_at&order=score.desc,created_at.asc&limit=${LEADERBOARD_LIMIT}`;
+  const url = `${cfg.supabaseUrl}/rest/v1/scores?${query}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const rows = await res.json();
+    state.leaderboardEntries = rows.map((r) => ({
+      name: sanitizePlayerName(r.name || "???") || "???",
+      score: Number.isFinite(Number(r.score)) ? Math.floor(Number(r.score)) : 0,
+    }));
+    renderLeaderboard();
+    setScoreStatus("Toppliste oppdatert.");
+  } catch (_err) {
+    setScoreStatus("Kunne ikke hente toppliste.");
+  }
+}
+
+async function submitScore(name, score) {
+  const cleanName = sanitizePlayerName(name);
+  if (cleanName.length < 1) {
+    setScoreStatus("Skriv inn navn (1-5 tegn).");
+    return;
+  }
+  if (!isLeaderboardConfigured()) {
+    setScoreStatus("Toppliste ikke konfigurert enda.");
+    return;
+  }
+
+  const cfg = getLeaderboardConfig();
+  const url = `${cfg.supabaseUrl}/rest/v1/scores`;
+
+  saveScoreBtnEl.disabled = true;
+  setScoreStatus("Lagrer score...");
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        name: cleanName,
+        score: Math.floor(score),
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    state.scoreSavedForRun = true;
+    setScoreStatus("Score lagret!");
+    await fetchLeaderboard();
+  } catch (_err) {
+    setScoreStatus("Kunne ikke lagre score.");
+  } finally {
+    saveScoreBtnEl.disabled = false;
+  }
+}
+
 function beginIntro() {
   state.introActive = true;
   state.running = false;
   state.score = 0;
+  state.scoreSavedForRun = false;
   state.obstacles = [];
   state.player.vy = 0;
   state.worldOffset = 0;
@@ -219,6 +344,7 @@ function resetGame(rebuildTerrain = true) {
   state.score = 0;
   state.running = true;
   state.introActive = false;
+  state.scoreSavedForRun = false;
 
   const now = performance.now();
   state.lastSpawnAt = now;
@@ -471,6 +597,10 @@ function update(now) {
     if (obstacle.x + obstacle.w < -2) {
       state.obstacles.splice(i, 1);
     }
+  }
+
+  if (!state.running && !state.scoreSavedForRun) {
+    setScoreStatus("Game Over. Skriv navn (maks 5) og lagre score.");
   }
 
   syncHud();
@@ -861,10 +991,32 @@ startGameBtn.addEventListener("click", () => {
   beginGame();
 });
 
+playerNameEl.addEventListener("input", () => {
+  const clean = sanitizePlayerName(playerNameEl.value);
+  if (playerNameEl.value !== clean) {
+    playerNameEl.value = clean;
+  }
+});
+
+scoreFormEl.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!state.sessionStarted || state.running || state.introActive) {
+    setScoreStatus("Du kan lagre score etter Game Over.");
+    return;
+  }
+  if (state.scoreSavedForRun) {
+    setScoreStatus("Denne runden er allerede lagret.");
+    return;
+  }
+  await submitScore(playerNameEl.value, state.score);
+});
+
 state.best = loadBestScore();
 initializeTerrain();
 state.player.y = groundAtX(state.player.x + state.player.w * 0.5) - state.player.h;
 state.player.vy = 0;
 syncHud();
 showStartScreen();
+setScoreStatus("Last inn toppliste...");
+fetchLeaderboard();
 requestAnimationFrame(loop);

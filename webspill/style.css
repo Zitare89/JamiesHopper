@@ -124,6 +124,63 @@ canvas {
   flex-wrap: wrap;
 }
 
+.leaderboard {
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: rgba(7, 14, 36, 0.6);
+}
+
+.leaderboard h2 {
+  margin: 0 0 0.6rem;
+  font-family: "Orbitron", "Exo 2", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: #ccf3ff;
+}
+
+.score-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.score-form label {
+  font-size: 0.85rem;
+  color: #b7c9e8;
+}
+
+.score-form input {
+  width: 84px;
+  border: 1px solid #5c7aa0;
+  border-radius: 7px;
+  background: #0a1730;
+  color: #e6f5ff;
+  padding: 0.38rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.score-status {
+  min-height: 1.1rem;
+  margin: 0.5rem 0 0.45rem;
+  color: #a8d6ff;
+  font-size: 0.85rem;
+}
+
+.leaderboard-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.leaderboard-list li {
+  font-size: 0.9rem;
+  color: #d8e8ff;
+}
+
 button {
   border: 0;
   background: var(--accent);

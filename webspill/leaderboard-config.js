@@ -1,0 +1,4 @@
+window.LEADERBOARD_CONFIG = {
+  supabaseUrl: "https://vpkefimxxvlkltlfdzeq.supabase.co",
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwa2VmaW14eHZsa2x0bGZkemVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDk2MTEsImV4cCI6MjA4NzYyNTYxMX0.PDg13dic5pRKdYYsfMocaj8pJ6eOtrldaGS5bjBlAMY",
+};
