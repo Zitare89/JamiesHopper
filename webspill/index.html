@@ -1,0 +1,35 @@
+﻿<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jamies Hopper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="layout">
+    <h1>Jamies Hopper</h1>
+    <div class="game-wrap">
+      <canvas id="game" width="480" height="640" aria-label="Spillflate"></canvas>
+      <div id="start-screen" class="start-screen">
+        <h2>Klar for oppdrag?</h2>
+        <p><strong>Karakter:</strong> Ei_maJ</p>
+        <p>Trykk <strong>Mellomrom</strong>, <strong>Pil opp</strong> eller <strong>W</strong> for a hoppe.</p>
+        <p>Trykk <strong>R</strong> for ny runde.</p>
+        <p>Du starter pa romskip og sklir ned i terrenget.</p>
+        <p>Land pa brede firkant-plattformer, og unnga manesteiner og UFO-er.</p>
+        <button id="start-game" type="button">Start spillet</button>
+      </div>
+    </div>
+    <div class="hud">
+      <span>Poeng: <strong id="score">0</strong></span>
+      <span>Beste: <strong id="best">0</strong></span>
+      <button id="restart" type="button">Start på nytt</button>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

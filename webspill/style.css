@@ -1,0 +1,138 @@
+﻿:root {
+  --bg: #040713;
+  --panel: rgba(8, 12, 34, 0.82);
+  --text: #d7e8ff;
+  --accent: #0ec7e8;
+  --line: rgba(114, 181, 255, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Exo 2", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 18%, rgba(155, 83, 255, 0.2) 0, transparent 38%),
+    radial-gradient(circle at 80% 28%, rgba(16, 199, 255, 0.2) 0, transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(15, 61, 117, 0.35) 0, transparent 48%),
+    var(--bg);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 8% 16%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 24% 80%, rgba(188, 220, 255, 0.8), transparent),
+    radial-gradient(1.8px 1.8px at 40% 32%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.7px 1.7px at 62% 70%, rgba(205, 230, 255, 0.75), transparent),
+    radial-gradient(1.6px 1.6px at 76% 15%, rgba(255, 255, 255, 0.86), transparent),
+    radial-gradient(1.5px 1.5px at 90% 58%, rgba(201, 222, 255, 0.7), transparent);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.layout {
+  width: min(92vw, 520px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-family: "Orbitron", "Exo 2", sans-serif;
+  font-size: 1.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b8efff;
+  text-shadow: 0 0 12px rgba(14, 199, 232, 0.55), 0 0 26px rgba(132, 95, 255, 0.4);
+  text-align: center;
+}
+
+.hint {
+  margin: 0 0 0.9rem;
+  color: #b7c9e8;
+  font-size: 0.95rem;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  background: linear-gradient(#08324f, #021a2b);
+  border-radius: 10px;
+  display: block;
+}
+
+.game-wrap {
+  position: relative;
+}
+
+.start-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.8rem;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(1, 8, 24, 0.8);
+  border-radius: 10px;
+}
+
+.start-screen h2 {
+  margin: 0;
+  font-family: "Orbitron", "Exo 2", sans-serif;
+  font-size: 1.4rem;
+  color: #c6f6ff;
+}
+
+.start-screen p {
+  margin: 0;
+  color: #b8d2ea;
+}
+
+.start-screen strong {
+  color: #d6f9ff;
+}
+
+.start-screen.hidden {
+  display: none;
+}
+
+.hud {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+button {
+  border: 0;
+  background: var(--accent);
+  color: #04121e;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
