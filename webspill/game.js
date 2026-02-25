@@ -840,9 +840,14 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-canvas.addEventListener("click", () => {
+function handleCanvasPress(e) {
+  e.preventDefault();
   jump();
-});
+}
+
+canvas.addEventListener("pointerdown", handleCanvasPress, { passive: false });
+canvas.addEventListener("touchstart", handleCanvasPress, { passive: false });
+canvas.addEventListener("click", handleCanvasPress);
 
 restartBtn.addEventListener("click", () => {
   if (!state.sessionStarted) {

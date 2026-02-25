@@ -76,6 +76,7 @@ canvas {
   background: linear-gradient(#08324f, #021a2b);
   border-radius: 10px;
   display: block;
+  touch-action: manipulation;
 }
 
 .game-wrap {
