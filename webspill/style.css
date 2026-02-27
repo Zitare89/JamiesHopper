@@ -232,3 +232,29 @@ button:hover {
     display: flex;
   }
 }
+
+@media (max-width: 540px) {
+  .layout {
+    width: min(96vw, 520px);
+    padding: 0.75rem;
+  }
+
+  .hud {
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .hud button {
+    flex: 1 1 110px;
+  }
+
+  .mobile-controls {
+    inset: auto 8px 8px 8px;
+  }
+}
+
+@media (max-height: 740px) and (pointer: coarse) {
+  .game-wrap {
+    padding-bottom: 56px;
+  }
+}
