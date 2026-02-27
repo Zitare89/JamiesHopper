@@ -27,6 +27,7 @@
         <p>Du starter pa romskip og sklir ned i terrenget.</p>
         <p>Land pa brede firkant-plattformer, og unnga manesteiner og UFO-er.</p>
         <button id="start-game" type="button">Start spillet</button>
+        <button id="open-leaderboard" type="button" class="secondary">Se topplisten</button>
       </div>
     </div>
     <div class="hud">
@@ -34,20 +35,27 @@
       <span>Beste: <strong id="best">0</strong></span>
       <button id="restart" type="button">Start på nytt</button>
       <button id="pause" type="button">Pause</button>
-      <button id="mute" type="button">Lyd: På</button>
     </div>
-    <section class="leaderboard" aria-label="Global highscore">
-      <h2>Global Top 25</h2>
-      <form id="score-form" class="score-form">
-        <label for="player-name">Navn (maks 5)</label>
-        <input id="player-name" name="player-name" type="text" maxlength="5" autocomplete="nickname" placeholder="ABC" />
-        <button id="save-score" type="submit">Lagre score</button>
-      </form>
-      <p id="score-status" class="score-status"></p>
-      <ol id="leaderboard-list" class="leaderboard-list"></ol>
-    </section>
+    <div id="leaderboard-modal" class="leaderboard-modal hidden" role="dialog" aria-modal="true" aria-label="Global toppliste">
+      <div class="leaderboard-card">
+        <div class="leaderboard-header">
+          <h2>Global Top 25</h2>
+          <button id="close-leaderboard" type="button" class="ghost">Lukk</button>
+        </div>
+        <section class="leaderboard" aria-label="Global highscore">
+          <form id="score-form" class="score-form">
+            <label for="player-name">Navn (maks 5)</label>
+            <input id="player-name" name="player-name" type="text" maxlength="5" autocomplete="nickname" placeholder="ABC" />
+            <button id="save-score" type="submit">Lagre score</button>
+          </form>
+          <p id="score-status" class="score-status"></p>
+          <ol id="leaderboard-list" class="leaderboard-list"></ol>
+        </section>
+      </div>
+    </div>
   </main>
   <script src="leaderboard-config.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
+
